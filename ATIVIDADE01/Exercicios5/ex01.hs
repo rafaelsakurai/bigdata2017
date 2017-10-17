@@ -115,17 +115,64 @@ puzzle houses
                      japaneseParliaments houses,
                      norwegianNextBlueHouse houses]
 
+generateEnumValues :: (Enum a) => [a]
+generateEnumValues = enumFrom (toEnum 0)
+
+colors :: [Color]
+colors = generateEnumValues
+
+nationalities :: [Nationality]
+nationalities = generateEnumValues
+
+drinks :: [Drink]
+drinks = generateEnumValues
+
+smokes :: [Smoke]
+smokes = generateEnumValues
+
+pets :: [Pet]
+pets = generateEnumValues
+
+-- | Monta um conjunto de vetores de casas de acordo com os vetores de configurações recebidos.
+makeHouses :: ([Color], [Nationality], [Drink], [Smoke], [Pet]) -> [House]
+makeHouses (c, n, d, s, p) = [House (c !! x) (n !! x) (d !! x) (s !! x) (p !! x) | x <- [0.. length c - 1]]
+
+combinations cs ns ds ss ps = [makeHouses (c, n, d, s, p) | c <- cs, n <- ns, d <- ds, s <- ss, p <- ps]
+
+-- | Testa as combinações de casas e devolve a combinação que atende todas as regras.
+test :: [[House]] -> [House]
+test x = test' x 0
+  where
+    test' x i
+      | i == (length x - 1) = Nothing
+      | puzzle (x !! i) == True = Just (x !! i)
+      | otherwise = test' x (i + 1)
+
 -- | Função principal
 main :: IO()
 main = do
-  print(puzzle [(House Red Englishman Coffee OldGold Dog), 
-                (House Red Englishman Coffee OldGold Dog), 
-                (House Red Englishman Coffee OldGold Dog), 
-                (House Red Englishman Coffee OldGold Dog), 
-                (House Red Englishman Coffee OldGold Dog)])
+  -- Teste que não atende as regras do Zebra Puzzle
+  print(puzzle [(House Red Spaniard Tea Kools Zebra), 
+                (House Yellow Norwegian Coffee OldGold Horse), 
+                (House Blue Englishman Water Chesterfield Dog), 
+                (House Green Japanese OrangeJuice Parliament Snails), 
+                (House Ivory Ukrainian Milk LuckyStrike Fox)])
 
+  -- Teste que atende todas as regras do Zebra Puzzle
   print(puzzle [(House Yellow Norwegian Water Kools Fox), 
                 (House Blue Ukrainian Tea Chesterfield Horse), 
                 (House Red Englishman Milk OldGold Snails), 
                 (House Ivory Spaniard OrangeJuice LuckyStrike Dog), 
                 (House Green Japanese Coffee Parliament Zebra)])
+
+  let cores = permutations $ colors
+  let nacionalidades = permutations $ nationalities
+  let bebidas = permutations $ drinks
+  let cigarros = permutations $ smokes
+  let animais = permutations $ pets
+
+  -- Gera todas as combinações possíveis
+  let combinacoes = combinations cores nacionalidades bebidas cigarros animais
+  -- Verifica qual combinação está correta
+  let resposta = test combinacoes
+  print(resposta)
